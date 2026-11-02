@@ -1,0 +1,8 @@
+# osobní nastavení
+nastaveni.json
+# vlastní styly uživatele (do repa patří jen šablona a ukázka)
+styly/*
+!styly/_sablona.md
+!styly/ukazka-mluvici-hlava.md
+__pycache__/
+.DS_Store
