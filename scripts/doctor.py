@@ -1,9 +1,10 @@
-"""Kontrola instalace: co je hotové a co chybí (s odkazem na krok v INSTALL.md).
+"""Kontrola instalace: co je hotové a co chybí (s odkazem na krok v INSTALL.md). Mac i Windows.
 
-Použití: python3 doctor.py
+Použití: python3 doctor.py   (Windows: python doctor.py)
 Nic neinstaluje ani nemění. Konec 0 = vše povinné je hotové, 1 = něco chybí.
 """
 import json
+import os
 import platform
 import re
 import shutil
@@ -12,8 +13,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from nastaveni import SKILL, cesta, nacti  # noqa: E402
+from nastaveni import MAC, SKILL, WINDOWS, cesta, nacti, venv_python  # noqa: E402
 
+sys.stdout.reconfigure(encoding="utf-8")  # Windows: ✓ a čeština i v okně, které má jinou znakovou sadu
 HOME = Path.home()
 chyby = 0
 
@@ -28,17 +30,49 @@ def radek(ok, co, detail="", krok="", povinne=True):
 
 
 def out(cmd):
+    exe = shutil.which(str(cmd[0])) or str(cmd[0])  # na Windows najde i hyperframes.cmd
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        r = subprocess.run([exe, *cmd[1:]], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
         return (r.stdout + r.stderr).strip() if r.returncode == 0 else None
-    except (FileNotFoundError, subprocess.TimeoutExpired):
+    except (FileNotFoundError, OSError, subprocess.TimeoutExpired):
         return None
 
 
+def pamet_gb():
+    if WINDOWS:
+        import ctypes
+
+        class Stav(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong), ("ullTotalPhys", ctypes.c_ulonglong),
+                        ("ullAvailPhys", ctypes.c_ulonglong), ("ullTotalPageFile", ctypes.c_ulonglong),
+                        ("ullAvailPageFile", ctypes.c_ulonglong), ("ullTotalVirtual", ctypes.c_ulonglong),
+                        ("ullAvailVirtual", ctypes.c_ulonglong), ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+        s = Stav(dwLength=ctypes.sizeof(Stav))
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(s))
+        return s.ullTotalPhys / 2**30
+    try:
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 2**30
+    except (ValueError, OSError, AttributeError):
+        return 0
+
+
+def python_s_whisperem():
+    """Stejné pořadí jako scripts/py: nastaveni.json → ~/AI-strih/nastroje/python → nástroj uv mlx-whisper."""
+    kandidati = [Path(nacti()["python"]).expanduser()] if nacti()["python"] else []
+    kandidati.append(venv_python(HOME / "AI-strih" / "nastroje" / "python"))
+    uv = out(["uv", "tool", "dir"])
+    if uv:
+        kandidati.append(Path(uv) / "mlx-whisper" / "bin" / "python")
+    return next((k for k in kandidati if k.exists()), None)
+
+
 print("Počítač")
-mac = platform.system() == "Darwin" and platform.machine() == "arm64"
-radek(mac, "Mac s Apple Silicon", f"{platform.system()} {platform.machine()}", "0")
-ram = int(out(["sysctl", "-n", "hw.memsize"]) or 0) / 2**30
+system = f"{platform.system()} {platform.release()} {platform.machine()}"
+apple = MAC and platform.machine() == "arm64"
+radek(MAC or WINDOWS, "Mac nebo Windows", system, "0", povinne=False)
+if not apple:
+    radek(False, "přepis řeči poběží na procesoru (faster-whisper)", "pomalejší než na Macu s Apple Silicon", povinne=False)
+ram = pamet_gb()
 radek(ram >= 16, "paměť aspoň 16 GB", f"{ram:.0f} GB", povinne=False)
 volno = shutil.disk_usage(HOME).free / 2**30
 radek(volno >= 12, "volné místo aspoň 12 GB", f"{volno:.0f} GB", povinne=False)
@@ -50,8 +84,9 @@ radek((SKILL / "nastaveni.json").exists(), "nastaveni.json", f"jazyk {cfg['jazyk
 print("Nástroje")
 ff = out(["ffmpeg", "-hide_banner", "-filters"]) or ""
 radek(bool(ff), "ffmpeg", (out(["ffmpeg", "-version"]) or "").split("\n")[0][:60], "2")
+plna = "Windows: plná verze Gyan.FFmpeg" if WINDOWS else "obyčejný ffmpeg z Homebrew ho nemá, chce to ffmpeg-full"
 for f in ("drawtext", "ass", "lut3d", "loudnorm"):
-    radek(bool(re.search(rf"\s{f}\s", ff)), f"ffmpeg filtr {f}", "" if f in ff else "obyčejný ffmpeg z Homebrew ho nemá, chce to ffmpeg-full", "2")
+    radek(bool(re.search(rf"\s{f}\s", ff)), f"ffmpeg filtr {f}", "" if f in ff else plna, "2")
 radek(bool(out(["ffprobe", "-version"])), "ffprobe", krok="2")
 for nazev in ("yt-dlp", "uv", "git"):
     v = out([nazev, "--version"])
@@ -61,9 +96,10 @@ m = re.match(r"v(\d+)", node)
 radek(bool(m and int(m.group(1)) >= 22), "Node.js 22+", node, "2")
 
 print("Přepis řeči (Whisper)")
-py = SKILL / "scripts" / "py"
-w = out([str(py), "-c", "import mlx_whisper, numpy; print('ok')"])
-radek(w == "ok", "mlx-whisper + numpy", "" if w == "ok" else "scripts/py nenašel Python s mlx_whisper", "3")
+py = python_s_whisperem()
+test = "import numpy\ntry:\n import mlx_whisper as w\nexcept ImportError:\n import faster_whisper as w\nprint(w.__name__)"
+w = out([str(py), "-c", test]) if py else None
+radek(bool(w), "Whisper + numpy", (w or "").replace("_", "-") if w else "scripts/py nenašel Python s Whisperem", "3")
 
 print("Grafika (HyperFrames)")
 hf = out(["hyperframes", "--version"])
@@ -75,16 +111,16 @@ print("Zvuk")
 zv = cesta("zvuky")
 n = len(list((zv / "sounds").rglob("*.wav"))) if (zv / "sounds").exists() else 0
 radek(n >= 300, "knihovna sfx-kit (CC0)", f"{n} zvuků v {zv}", "5")
-ea = cesta("earshot") / ".venv" / "bin" / "python"
+ea = venv_python(cesta("earshot") / ".venv")
 radek(out([str(ea), "-c", "import earshot; print('ok')"]) == "ok", "earshot", str(ea), "6")
 try:
-    mcp = json.loads((HOME / ".claude.json").read_text()).get("mcpServers", {})
+    mcp = json.loads((HOME / ".claude.json").read_text(encoding="utf-8")).get("mcpServers", {})
 except (FileNotFoundError, json.JSONDecodeError):
     mcp = {}
 radek("earshot" in mcp, "earshot jako MCP server v Claude Code", "", "6")
 radek((sk / "earshot").exists(), "skill earshot", "", "6")
 rs = sk / "real-sfx" / "config.json"
-radek(rs.exists() and bool(json.loads(rs.read_text()).get("libraries")), "skill real-sfx s knihovnou", "", "7")
+radek(rs.exists() and bool(json.loads(rs.read_text(encoding="utf-8")).get("libraries")), "skill real-sfx s knihovnou", "", "7")
 
 print("Volitelné")
 radek((sk / "watch").exists() or bool(list((HOME / ".claude" / "plugins").rglob("watch/SKILL.md"))),

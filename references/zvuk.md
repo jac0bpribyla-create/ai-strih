@@ -28,11 +28,11 @@ Méně je víc: efekt jen tam, kde se v obraze něco děje. Nic v prvních 0,15 
 Pro render z HyperFrames nebo screen recording (desítky momentů) použij skill **real-sfx** – najde momenty, vybere zvuky z knihovny a umístí je na snímek:
 ```
 R=~/.claude/skills/real-sfx/scripts
-python3 $R/setup.py check
-python3 $R/from_hyperframes.py <hyperframes složka nebo index.html> --video <render.mp4> --out <projekt>/zvuk/cues.json
-python3 $R/mix.py <projekt>/zvuk/cues.json --out <projekt>/zvuk/video_sfx.mp4 --voice-safe --plan   # nejdřív plán
-python3 $R/mix.py <projekt>/zvuk/cues.json --out <projekt>/zvuk/video_sfx.mp4 --voice-safe
-python3 $R/critique.py <projekt>/zvuk/video_sfx_resolved_cues.json <projekt>/zvuk/video_sfx_sfx_track.wav
+$PY $R/setup.py check
+$PY $R/from_hyperframes.py <hyperframes složka nebo index.html> --video <render.mp4> --out <projekt>/zvuk/cues.json
+$PY $R/mix.py <projekt>/zvuk/cues.json --out <projekt>/zvuk/video_sfx.mp4 --voice-safe --plan   # nejdřív plán
+$PY $R/mix.py <projekt>/zvuk/cues.json --out <projekt>/zvuk/video_sfx.mp4 --voice-safe
+$PY $R/critique.py <projekt>/zvuk/video_sfx_resolved_cues.json <projekt>/zvuk/video_sfx_sfx_track.wav
 ```
 `--voice-safe` ztlumí efekty pod řečí. Výsledek: nové MP4 + samostatná stopa efektů (WAV) + hodnocení. Podrobnosti v SKILL.md skillu real-sfx. Pozor: syntetické zvuky, které už jsou v renderu (z `hf_kompozice.py`), real-sfx nahradí – nevrstvi oboje.
 
@@ -48,7 +48,7 @@ python3 $R/critique.py <projekt>/zvuk/video_sfx_resolved_cues.json <projekt>/zvu
 - Delší video nebo „launch“ styl: `mcp__earshot__critique` – skóre proti profesionálním filmům, s konkrétními časy k opravě.
 - Délka zvuku = délka obrazu (`ffprobe` obou streamů, rozdíl < 0,05 s).
 - Hotový zvuk znovu přepiš Whisperem (`rozbor_videa.py`) – useknutá slova, opakování a slyšitelné pokyny z natáčení se tak najdou bez poslechu.
-- HyperFrames dělá z mono hlasu dual-mono stereo (měří se o ~3 LU hlasitěji) → po renderu vždy `python3 $S/hlasitost.py`.
+- HyperFrames dělá z mono hlasu dual-mono stereo (měří se o ~3 LU hlasitěji) → po renderu vždy `$PY $S/hlasitost.py`.
 - `mcp__earshot__llm_critique` posílá zvuk do Gemini – **jen s výslovným souhlasem uživatele**.
 
 ## Výkon

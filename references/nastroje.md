@@ -1,11 +1,11 @@
 # Nástroje a příkazy
 
-`S=~/.claude/skills/ai-strih/scripts` · `PY="$S/py"` (Python s mlx_whisper a numpy) · cesty a jazyk v `nastaveni.json` (`python3 $S/nastaveni.py` je vypíše).
+`S=~/.claude/skills/ai-strih/scripts` · `PY="$S/py"` (Python s Whisperem a numpy – mlx-whisper na Macu s Apple Silicon, jinde faster-whisper; všechny skripty spouštěj přes něj) · cesty a jazyk v `nastaveni.json` (`$PY $S/nastaveni.py` je vypíše).
 V zsh se proměnná se seznamem nerozdělí na slova – seznamy klipů vypiš ručně nebo je předej z Pythonu.
 
 ## Projekt a materiál
-- `python3 $S/novy_projekt.py "<název>" <složka> [--styl <styl>]` → `<projekty>/<název>/` (projekt.json: zdroje, jazyk, LUT, otočení, fps, písmo, barvy; PRAVIDLA-STRIHU.md; README.md).
-- `python3 $S/nahledy.py <projekt> out.jpg --tile 200 --cols 10 C0001@1.5 C0002 …` – snímky klipů s LUTem a otočením (`@čas`, jinak střed).
+- `$PY $S/novy_projekt.py "<název>" <složka> [--styl <styl>]` → `<projekty>/<název>/` (projekt.json: zdroje, jazyk, LUT, otočení, fps, písmo, barvy; PRAVIDLA-STRIHU.md; README.md).
+- `$PY $S/nahledy.py <projekt> out.jpg --tile 200 --cols 10 C0001@1.5 C0002 …` – snímky klipů s LUTem a otočením (`@čas`, jinak střed).
 - `$PY $S/prepis_slova.py <projekt> --vse` – Whisper se slovy (`prepisy-slova/<klip>.json`: segments → words `w/s/e/p`).
 - `$PY $S/pauzy.py <projekt> C0001 C0002` – úseky řeči podle hlasitosti, pauzy > 0,3 s a **zaváhání** (podle hlasitosti každé promluvy). Zaváhání nad 0,25 s vystřihnout vždy.
 - `$PY $S/onsety.py <klip> <od> <do> --prepis prepis.json` – hranice slov z hlasitosti (sem nasazovat B-roll a střihy) a šumové úseky (nádech, kašel).
@@ -32,9 +32,9 @@ V zsh se proměnná se seznamem nerozdělí na slova – seznamy klipů vypiš r
 - B-roll nad 2 s rozděl; v rychlém střídání po 0,5–1,5 s.
 
 ## Render a zvuk
-- `python3 $S/strih.py edl/x.json [--rychle]` → `export/<name>[_<hook>].mp4` + `.srt`. Hooky = `"hooks"` v EDL (každý = samostatné video se stejným tělem).
+- `$PY $S/strih.py edl/x.json [--rychle]` → `export/<name>[_<hook>].mp4` + `.srt`. Hooky = `"hooks"` v EDL (každý = samostatné video se stejným tělem).
 - HyperFrames: `hyperframes lint <výstup>/public` → `PRODUCER_BROWSER_GPU_MODE=hardware hyperframes snapshot <výstup>/public --at 1.0,2.5` → `hyperframes render <výstup>/public -o <výstup>/output.mp4 --fps 25`.
-- Hlasitost po HyperFrames: `python3 $S/hlasitost.py output.mp4 export/<name>.mp4` (dvouprůchodový `loudnorm` na −14 LUFS / −1,5 dBTP, obraz se nepřekódovává). V zsh piš `${promenna}`, ne `$promenna:…`.
+- Hlasitost po HyperFrames: `$PY $S/hlasitost.py output.mp4 export/<name>.mp4` (dvouprůchodový `loudnorm` na −14 LUFS / −1,5 dBTP, obraz se nepřekódovává). V zsh piš `${promenna}`, ne `$promenna:…`.
 - Náhled do mobilu (pod 30 MB): `ffmpeg -i x.mp4 -c:v libx264 -crf 24 -preset medium -c:a copy -movflags +faststart x_nahled.mp4`.
 
 ## Obrázky z webu uživatele

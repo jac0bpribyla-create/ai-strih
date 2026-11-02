@@ -1,6 +1,6 @@
 # Střihový list (EDL) pro `strih.py`
 
-Soubor `<projekt>/edl/<číslo>-<název>_v<verze>.json`. Render: `python3 $S/strih.py <projekt>/edl/<soubor>.json [--rychle]`.
+Soubor `<projekt>/edl/<číslo>-<název>_v<verze>.json`. Render: `$PY $S/strih.py <projekt>/edl/<soubor>.json [--rychle]`.
 Výstup `<projekt>/export/<name>[_<hook>].mp4` (H.264, AAC 192k, −14 LUFS) + `.srt` (stejné titulky, třeba pro CapCut nebo YouTube).
 
 Všechny časy jsou v sekundách. `in`/`out`/`src` = čas v klipu, `t_from`/`t_to` = čas ve výsledném videu.

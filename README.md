@@ -19,11 +19,11 @@ Claude ti řekne, co nainstaluje, zeptá se na jazyk tvých videí a na konci v�
 
 ## Co potřebuješ
 - **Claude Code** s placeným plánem Claude (na zkoušku stačí Pro, na pravidelné stříhání se hodí Max).
-- **Mac s Apple Silicon** (M1 a novější), ideálně 16 GB paměti. Na Windows a Intel Macu zatím nefunguje přepis řeči.
+- **Mac nebo Windows 10/11**, ideálně 16 GB paměti. Nejrychlejší je Mac s Apple Silicon (M1 a novější). Na Windows a Intel Macu běží přepis řeči na procesoru, takže trvá déle (počítej zhruba s délkou záznamu, na slabším notebooku i víc). Střih, grafika i zvuk fungují všude stejně.
 - **~10 GB místa** na disku a 15–40 minut na instalaci.
-- **Homebrew** (https://brew.sh) – když ho nemáš, nainstaluješ ho jedním příkazem v Terminálu.
+- **Na Macu Homebrew** (https://brew.sh) – když ho nemáš, nainstaluješ ho jedním příkazem v Terminálu. Na Windows stačí winget, který už v systému je.
 
-Všechno ostatní (ffmpeg, Whisper, HyperFrames, earshot, real-sfx, knihovnu zvuků) nainstaluje Claude podle INSTALL.md. Všechno je zdarma a běží na tvém Macu.
+Všechno ostatní (ffmpeg, Whisper, HyperFrames, earshot, real-sfx, knihovnu zvuků) nainstaluje Claude podle INSTALL.md. Všechno je zdarma a běží na tvém počítači.
 
 ## Použití
 V novém chatu napiš třeba:
@@ -43,9 +43,9 @@ Hotová videa najdeš v `~/AI-strih/projekty/<název>/export/`.
 
 **A hudba?** Jen ta, ke které máš práva (vlastní, licencovaná, YouTube Audio Library). Claude populární písničky nestahuje.
 
-**Posílá se něco do cloudu?** Ne, střih, přepis i kontrola zvuku běží na tvém Macu. Výjimka je jen volitelné hodnocení zvuku přes Gemini, a to jen když ho výslovně povolíš.
+**Posílá se něco do cloudu?** Ne, střih, přepis i kontrola zvuku běží na tvém počítači. Výjimka je jen volitelné hodnocení zvuku přes Gemini, a to jen když ho výslovně povolíš.
 
-**Mac mi při střihu zamrzá.** Skill pouští těžké úlohy (přepis, render) po jedné. Nepouštěj víc střihových chatů najednou.
+**Počítač mi při střihu zamrzá.** Skill pouští těžké úlohy (přepis, render) po jedné. Nepouštěj víc střihových chatů najednou.
 
 ## Struktura
 - `SKILL.md` – postup, který Claude dodržuje

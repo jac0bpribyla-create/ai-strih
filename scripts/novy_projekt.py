@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from nastaveni import SKILL, cesta, nacti  # noqa: E402
+from nastaveni import PISMO, SKILL, cesta, nacti  # noqa: E402
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             "lut": {"kdy": "nikdy"},
             "otocit": {},
             "fps": 30,
-            "font": "Avenir Next",
+            "font": PISMO,
             "barvy": {"box": "#141414", "text": "#FFFFFF", "zvyrazneni": "#FFD400"},
         }, ensure_ascii=False, indent=2) + "\n")
     rules = root / "PRAVIDLA-STRIHU.md"

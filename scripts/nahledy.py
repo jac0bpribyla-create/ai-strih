@@ -9,9 +9,10 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from nastaveni import PISMO_NAHLED, ff  # noqa: E402
 from projekt import Projekt  # noqa: E402
 
-FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+FONT = ff(PISMO_NAHLED)
 
 
 def duration(p: Path) -> float:

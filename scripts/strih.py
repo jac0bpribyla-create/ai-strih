@@ -29,6 +29,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from nastaveni import ff  # noqa: E402
 from projekt import Projekt, ass_color  # noqa: E402
 
 FORMATS = {"9:16": (1080, 1920), "4:5": (1080, 1350), "1:1": (1080, 1080), "16:9": (1920, 1080)}
@@ -369,7 +370,7 @@ class Render:
         if "lut" not in seg:
             return self.p.source_filters(seg["clip"])
         l = seg["lut"]
-        f = f"lut3d=file='{self.p.path(l if isinstance(l, str) else self.p.cfg['lut']['soubor'])}':interp=tetrahedral" if l else ""
+        f = f"lut3d=file='{ff(self.p.path(l if isinstance(l, str) else self.p.cfg['lut']['soubor']))}':interp=tetrahedral" if l else ""
         return [x for x in (f, self.p.rotate_filter(seg["clip"])) if x]
 
     def picture(self, seg, speed: float) -> str:
@@ -818,7 +819,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         if events:
             ass = tmp_dir / f"{name}.ass"
             ass.write_text(self.ass_header(cap or {}) + "\n".join(events) + "\n", encoding="utf-8")
-            self.chains.append(f"[{vlast}]ass='{ass}':fontsdir='{self.p.cfg['fonty']}'[vout]")
+            self.chains.append(f"[{vlast}]ass='{ff(ass)}':fontsdir='{ff(self.p.cfg['fonty'])}'[vout]")
             vlast = "vout"
 
         pops = [p["t_from"] for p in self.edl.get("popups", []) if p.get("pop", True) and p.get("sfx", True)]

@@ -1,7 +1,8 @@
 {
   "projekty": "~/AI-strih/projekty",
   "jazyk": "cs",
-  "whisper_model": "mlx-community/whisper-large-v3-turbo",
+  "whisper_model": "",
+  "whisper_zarizeni": "cpu",
   "python": "",
   "zvuky": "~/AI-strih/zvuky/sfx-kit",
   "earshot": "~/AI-strih/nastroje/earshot"

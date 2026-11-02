@@ -9,48 +9,49 @@ Stříhám jako střihač bez střihového programu: obraz a zvuk řeší ffmpeg
 
 ```
 S=~/.claude/skills/ai-strih/scripts      # skripty skillu
-PY="$S/py"                               # Python s mlx_whisper a numpy (scripts/py ho najde sám)
+PY="$S/py"                               # Python s Whisperem a numpy (scripts/py ho najde sám)
 ```
+Všechny skripty spouštěj přes `$PY`, i ty bez Whisperu: na Windows `python3` není a `$PY` přepne Python do UTF-8 (čeština ve výpisech a souborech). Na Windows běží příkazy v Git Bash – cesty piš s `/` a domovskou složku jako `~`.
 
 ## Pravidla, která platí vždy
 - **Hrubý střih → schválení → grafika → zvuk.** Grafiku ani efekty nedělám, dokud uživatel neschválí hrubý střih. Opravit střih po grafice znamená přepočítat všechny časy.
 - **Jedno video najednou.** Na zpětnou vazbu čekám, verze číslují `_v1`, `_v2`… a staré nikdy nepřepisuju.
-- **Jedna těžká úloha najednou** (Whisper, render, HyperFrames, stabilizace, earshot). Souběh na Macu s 16–24 GB paměti shodí počítač. Příkazy s ffmpeg na pozadí spouštěj s `< /dev/null`, jinak visí.
+- **Jedna těžká úloha najednou** (Whisper, render, HyperFrames, stabilizace, earshot). Souběh na počítači s 16–24 GB paměti ho shodí. Příkazy s ffmpeg na pozadí spouštěj s `< /dev/null`, jinak visí.
 - **Nic nestahuju bez souhlasu:** předem řeknu kolik souborů, odkud a kolik MB.
 - **Pořadí pravidel:** pokyn uživatele v chatu > `PRAVIDLA-STRIHU.md` projektu > `styly/<styl>.md` > `references/kontroly.md`.
 - Nikdy netvrdím, že něco „zní dobře“, bez měření z earshotu (`z`, LUFS, posun proti střihu).
 
 ## 0. První spuštění
-`python3 $S/doctor.py`. Když něco chybí (✗), projdi s uživatelem příslušný krok v `INSTALL.md` a pusť doctor znovu. Bez ✓ u Whisperu, ffmpeg a HyperFrames nezačínej.
+`$PY $S/doctor.py` (když `$PY` ještě nejde: `python3`, na Windows `python`). Když něco chybí (✗), projdi s uživatelem příslušný krok v `INSTALL.md` a pusť doctor znovu. Bez ✓ u Whisperu, ffmpeg a HyperFrames nezačínej.
 
 ## 1. Styl (z YouTube kanálu nebo videa)
 Uživatel pošle kanál nebo video, které chce napodobit → postup v `references/styl-z-kanalu.md`:
-1. `python3 $S/kanal.py seznam <kanál> [--shorts]` (jen metadata) → vyber 5–8 videí (nejsledovanější + nejnovější). Jedno video stačí taky.
-2. Se souhlasem: `python3 $S/kanal.py stahni <projekty>/_styly/<nazev>/videa <ID nebo odkaz> …`
+1. `$PY $S/kanal.py seznam <kanál> [--shorts]` (jen metadata) → vyber 5–8 videí (nejsledovanější + nejnovější). Jedno video stačí taky.
+2. Se souhlasem: `$PY $S/kanal.py stahni <projekty>/_styly/<nazev>/videa <ID nebo odkaz> …`
 3. `$PY $S/styl_rozbor.py --out <…>/rozbor <…>/videa/*.mp4` → čísla. **Prohlédni `list.jpg` každého úseku** (titulky, písmo, barvy, přechody, B-roll, rámování) – čísla neřeknou všechno.
 4. Napiš `styly/<nazev>.md` podle `styly/_sablona.md`, ukaž shrnutí v 5–8 bodech a nech ho potvrdit. Ukázka hotového stylu: `styly/ukazka-mluvici-hlava.md`.
 
 Když uživatel styl nemá a nechce ho tvořit, nabídni `ukazka-mluvici-hlava` a zeptej se na formát (9:16 / 16:9) a délku.
 
 ## 2. Projekt
-`python3 $S/novy_projekt.py "<název>" <složka se záběry> [--styl <styl>]` → `<projekty>/<název>/` (cesta z `nastaveni.json`). V existujícím projektu nejdřív přečti `PRAVIDLA-STRIHU.md`, `README.md` a poslední EDL v `edl/`.
+`$PY $S/novy_projekt.py "<název>" <složka se záběry> [--styl <styl>]` → `<projekty>/<název>/` (cesta z `nastaveni.json`). V existujícím projektu nejdřív přečti `PRAVIDLA-STRIHU.md`, `README.md` a poslední EDL v `edl/`.
 
 ## 3. Materiál
-- Náhledy: `python3 $S/nahledy.py <projekt> <projekt>/nahledy/vse.jpg` → prohlédni.
-- Přepis se slovy: `$PY $S/prepis_slova.py <projekt> --vse` (jazyk z `projekt.json`; první běh stáhne model ~1,6 GB).
+- Náhledy: `$PY $S/nahledy.py <projekt> <projekt>/nahledy/vse.jpg` → prohlédni.
+- Přepis se slovy: `$PY $S/prepis_slova.py <projekt> --vse` (jazyk z `projekt.json`; první běh stáhne model ~1,6 GB). Na Windows a Intel Macu běží přepis na procesoru (faster-whisper) a je výrazně pomalejší – u delšího materiálu to řekni předem a přepisuj jen klipy, které potřebuješ.
 - Řeč, pauzy a zaváhání: `$PY $S/pauzy.py <projekt> <klipy…>`. Začátky slov, nádech a kašel: `$PY $S/onsety.py <klip> <od> <do>`.
 - Třes kamery: `uv run --with "opencv-python-headless==4.10.0.84" --with "numpy<2.3" python $S/stabil.py mereni <klip>` – ber úseky pod 0,15 %.
-- Scénář od uživatele (docx: `textutil -convert txt -stdout`), jinak ho poskládej z přepisu.
+- Scénář od uživatele (docx: `$PY $S/docx_text.py scenar.docx`), jinak ho poskládej z přepisu.
 
 ## 4. Hrubý střih (a stop)
 1. Rozhodni a řekni v pár bodech: jaký scénář, které takes (plynulost > gramatika), co vypustit kvůli délce, kolik verzí začátku (hooků). Délka a tempo podle stylu.
 2. Střihový list `edl/<číslo>-<název>_v<N>.json` (formát `references/strihovy-list.md`) – u každého take a B-rollu pole `proc`. V hrubém střihu `"popups": []`, `"titulky": {"styl": "zadne"}`.
-3. `python3 $S/strih.py <projekt>/edl/<soubor>.json` → `export/<name>.mp4`. Přejmenuj na `<name>_zaklad.mp4`.
+3. `$PY $S/strih.py <projekt>/edl/<soubor>.json` → `export/<name>.mp4`. Přejmenuj na `<name>_zaklad.mp4`.
 4. `$PY $S/kontrola.py export/<…>_zaklad.mp4` (problik, pauzy, jas, hlasitost) a oprav, co nesedí.
 5. **Odevzdej hrubý střih a čekej:** cesta k videu + tabulka `Čas | Co říká | Obraz`, co jsem vystřihl a proč, co bych zkusil jinak. Napiš výslovně: „Až střih schválíš, jdu na grafiku a zvuk.“
 
 ## 5. Grafika (až po schválení)
-Podle stylu: texty s pop, počítadla, karty produktů, pilulka s webem, přechody zoom/švih → zadání v JSON → `python3 $S/hf_kompozice.py zadani.json` → `hyperframes lint` → `snapshot` → `render` → `python3 $S/hlasitost.py output.mp4 export/<name>.mp4` (−14 LUFS). **Časy ber z detekce střihů v `_zaklad.mp4`, ne z EDL.** Postup, bezpečné zóny a složitější prvky: `references/grafika.md` (a skilly `hyperframes`, `hyperframes-animation`). Jednoduché titulky celé řeči umí i `strih.py` (`references/titulky-a-texty.md`).
+Podle stylu: texty s pop, počítadla, karty produktů, pilulka s webem, přechody zoom/švih → zadání v JSON → `$PY $S/hf_kompozice.py zadani.json` → `hyperframes lint` → `snapshot` → `render` → `$PY $S/hlasitost.py output.mp4 export/<name>.mp4` (−14 LUFS). **Časy ber z detekce střihů v `_zaklad.mp4`, ne z EDL.** Postup, bezpečné zóny a složitější prvky: `references/grafika.md` (a skilly `hyperframes`, `hyperframes-animation`). Jednoduché titulky celé řeči umí i `strih.py` (`references/titulky-a-texty.md`).
 
 ## 6. Zvuk
 Postup v `references/zvuk.md`:

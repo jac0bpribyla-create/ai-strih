@@ -22,7 +22,7 @@ Jednou větou: člověk mluví do kamery, každé tvrzení má hned obraz (B-rol
 - 50p zpomalit 0,5×, 25p ne. Přesvětlené bílé pozadí stáhnout křivkou. Bez techniky z natáčení v pozadí, bez useknuté hlavy.
 
 ## Texty a grafika (HyperFrames, `hf_kompozice.py`)
-- Černý box `#141414`, bílé tučné verzálky (Avenir Next Bold nebo podobné bezpatkové), prostrkání 0,07 em, zaoblení 14 px, pop 30 → 112 → 100 % + tichý pop.
+- Černý box `#141414`, bílé tučné verzálky (Avenir Next Bold, na Windows Segoe UI Bold, nebo podobné bezpatkové), prostrkání 0,07 em, zaoblení 14 px, pop 30 → 112 → 100 % + tichý pop.
 - Jen čísla a klíčová slova (150 KG, 15 MM, 7 SUROVIN, 2 ROKY), čísla nabíhají od 0. Text přes hruď, ~100+ px pod bradou.
 - Karty produktů: bílé, fotka z webu + název, vyjedou zespodu, video ztmavne; víc produktů do mřížky 2×2.
 - Titulky celé řeči volitelně (`strih.py`, styl `karaoke`) – zeptej se.

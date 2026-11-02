@@ -20,9 +20,9 @@ import sys
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from nastaveni import nacti  # noqa: E402
+from nastaveni import PISMO_NAHLED, ff, nacti  # noqa: E402
 
-FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+FONT = ff(PISMO_NAHLED)
 SR = 16000
 HOP = 0.01
 
@@ -100,13 +100,11 @@ def lufs(p: Path):
 
 
 def transcribe(p: Path, lang: str):
-    import mlx_whisper
+    from whisper_prepis import prepis
     with tempfile.TemporaryDirectory() as tmp:
         wav = Path(tmp) / "a.wav"
         subprocess.run(["ffmpeg", "-v", "error", "-i", str(p), "-vn", "-ac", "1", "-ar", "16000", str(wav)], check=True)
-        r = mlx_whisper.transcribe(str(wav), path_or_hf_repo=nacti()["whisper_model"], language=lang or None,
-                                   word_timestamps=True, condition_on_previous_text=False,
-                                   hallucination_silence_threshold=1.0, no_speech_threshold=0.5)
+        r = prepis(wav, lang, no_speech_threshold=0.5)
     words = []
     for s in r["segments"]:
         if s.get("no_speech_prob", 0) > 0.8:

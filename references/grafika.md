@@ -11,15 +11,15 @@ Kompozice = `public/index.html`: `#video-wrap` se schváleným základem (`input
 | Pilulka s webem (bílá, zaoblená) | `pilulka` | na konci, na výzvě k akci |
 | Přechod zoom (1,25× + rozmazání 10 px) / švih (180 px, 1,35×, 16 px) se zvukem | `prechody` | jen na předělech příběhu; hýbe se jen video |
 
-Písmo: `styl.font` = písmo z Macu (výchozí Avenir Next), nebo vlastní soubory v `styl.fonty` (`{"700": "fonts/X-Bold.woff2"}`). Komerční písma (Futura, Gilroy…) do sdílených projektů nedávej bez licence.
+Písmo: `styl.font` = písmo z počítače (výchozí Avenir Next na Macu, Segoe UI na Windows; když chybí, použije se podobné bezpatkové), nebo vlastní soubory v `styl.fonty` (`{"700": "fonts/X-Bold.woff2"}`). Komerční písma (Futura, Gilroy…) do sdílených projektů nedávej bez licence.
 
 Zvuky prvků jsou ze sfx-kit (CC0) a nasazují se podle bodu synchronizace (vrchol whooshe přesně na střih). Když chceš jiné zvuky nebo jich je hodně, nech `prechody` bez zvuku a efekty udělej podle `references/zvuk.md`.
 
 ## Postup
 1. Schválený `_zaklad.mp4` → **časy střihů z detekce scén** (`kontrola.py` vypíše „střihy“). Podle nich přechody, texty ~0,15 s po přechodu.
-2. Zadání `hyperframes/<id>_v<N>/zadani.json` → `python3 $S/hf_kompozice.py zadani.json`.
+2. Zadání `hyperframes/<id>_v<N>/zadani.json` → `$PY $S/hf_kompozice.py zadani.json`.
 3. `hyperframes lint <výstup>/public` → `PRODUCER_BROWSER_GPU_MODE=hardware hyperframes snapshot <výstup>/public --at <čas každého textu po 0,5 s>` → **prohlédni snímky: text nesmí být přes obličej ani přes věc, o které se mluví**.
-4. `hyperframes render <výstup>/public -o <výstup>/output.mp4 --fps 25` (jeden render najednou) → `python3 $S/hlasitost.py <výstup>/output.mp4 <projekt>/export/<name>.mp4` (−14 LUFS) → `kontrola.py`.
+4. `hyperframes render <výstup>/public -o <výstup>/output.mp4 --fps 25` (jeden render najednou) → `$PY $S/hlasitost.py <výstup>/output.mp4 <projekt>/export/<name>.mp4` (−14 LUFS) → `kontrola.py`.
 5. Víc verzí začátku (hooky) generuj z jednoho zadání s `"posun"` – nikdy ručně kopírovat a posouvat (ztratí se zvuky a časy).
 
 ## Bezpečné zóny

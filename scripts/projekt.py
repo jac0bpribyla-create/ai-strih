@@ -9,8 +9,8 @@ projekt.json (všechno kromě "zdroje" je volitelné):
   "prepisy": "prepisy-slova",
   "lut": {"soubor": "assets/slog3-to-709.cube", "kdy": "sony-slog3"},
   "otocit": {"C0007": "cclock"},
-  "font": "Avenir Next",
-  "fonty": "/System/Library/Fonts/Supplemental",
+  "font": "Avenir Next",                         (výchozí podle systému: Avenir Next / Segoe UI)
+  "fonty": "/System/Library/Fonts/Supplemental", (složka písem pro titulky; výchozí podle systému)
   "barvy": {"box": "#141414", "text": "#FFFFFF", "zvyrazneni": "#E63B2E"}
 }
 lut.kdy: "vzdy" | "nikdy" | "sony-slog3" (podle Sony XML vedle klipu) | seznam názvů klipů.
@@ -24,15 +24,15 @@ from functools import lru_cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from nastaveni import nacti  # noqa: E402
+from nastaveni import FONTY, PISMO, ff, nacti  # noqa: E402
 
 DEFAULT = {
     "pripony": [".MP4", ".mp4", ".MOV", ".mov", ".m4v", ".MTS"],
     "prepisy": "prepisy-slova",
     "lut": {"kdy": "nikdy"},
     "otocit": {},
-    "font": "Avenir Next",
-    "fonty": "/System/Library/Fonts/Supplemental",
+    "font": PISMO,
+    "fonty": FONTY,
     "barvy": {"box": "#141414", "text": "#FFFFFF", "zvyrazneni": "#FFD400"},
 }
 
@@ -80,7 +80,7 @@ class Projekt:
         kdy = lut.get("kdy", "nikdy")
         use = (kdy == "vzdy" or (kdy == "sony-slog3" and self.is_slog3(clip))
                or (isinstance(kdy, list) and clip in kdy))
-        return f"lut3d=file='{self.path(lut['soubor'])}':interp=tetrahedral" if use and lut.get("soubor") else ""
+        return f"lut3d=file='{ff(self.path(lut['soubor']))}':interp=tetrahedral" if use and lut.get("soubor") else ""
 
     def rotate_filter(self, clip: str) -> str:
         r = self.cfg["otocit"].get(clip, "")

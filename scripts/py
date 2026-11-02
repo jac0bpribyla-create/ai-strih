@@ -1,14 +1,16 @@
-#!/bin/bash
-# Python s mlx_whisper a numpy pro skripty skillu: scripts/py scripts/<skript>.py …
-# Pořadí: "python" z nastaveni.json → nástroj uv mlx-whisper → chyba s návodem.
+#!/usr/bin/env bash
+# Python s Whisperem a numpy pro skripty skillu: scripts/py scripts/<skript>.py … (Mac i Windows v Git Bash)
+# Pořadí: "python" z nastaveni.json → ~/AI-strih/nastroje/python (venv) → nástroj uv mlx-whisper → chyba s návodem.
+export PYTHONUTF8=1  # Windows: soubory i výpis v UTF-8 (čeština, ✓)
 DIR="$(cd "$(dirname "$0")" && pwd)"
-PY="$(/usr/bin/python3 "$DIR/nastaveni.py" python 2>/dev/null)"
-if [ -z "$PY" ] && command -v uv >/dev/null 2>&1; then
-  PY="$(uv tool dir 2>/dev/null)/mlx-whisper/bin/python"
-fi
+PY="$(sed -n 's/.*"python"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$DIR/../nastaveni.json" 2>/dev/null | head -n 1)"
 PY="${PY/#\~/$HOME}"
-if [ ! -x "$PY" ]; then
-  echo "Chybí Python s mlx_whisper. Nainstaluj: uv tool install mlx-whisper --with numpy (viz INSTALL.md, krok 3)." >&2
-  exit 1
-fi
-exec "$PY" "$@"
+UV_TOOL="$(uv tool dir 2>/dev/null)"
+for k in "$PY" "$HOME/AI-strih/nastroje/python/bin/python" "$HOME/AI-strih/nastroje/python/Scripts/python.exe" \
+         "${UV_TOOL:+$UV_TOOL/mlx-whisper/bin/python}"; do
+  if [ -n "$k" ] && [ -x "$k" ]; then
+    exec "$k" "$@"
+  fi
+done
+echo "Chybí Python s Whisperem a numpy. Nainstaluj ho podle INSTALL.md, krok 3." >&2
+exit 1

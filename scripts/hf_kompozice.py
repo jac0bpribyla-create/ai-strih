@@ -8,7 +8,7 @@ Zadání (časy v s od začátku videa, cesty relativně k souboru zadání):
 {
   "id": "video-01", "video": "../export/01_zaklad.mp4", "vystup": "../hyperframes/01_v1", "frames": 779, "fps": 25, "w": 1080, "h": 1920,
   "styl": {"font": "Avenir Next", "fonty": {"700": "fonts/MujFont-Bold.woff2"}, "ink": "#141414", "paper": "#ffffff",
-           "radius": 14, "verzalky": true, "prostrkani": 0.07},   # "fonty" volitelné: bez nich se použije písmo z Macu
+           "radius": 14, "verzalky": true, "prostrkani": 0.07},   # "fonty" volitelné: bez nich se použije písmo z počítače
   "texty": [{"id": "h1", "radky": ["Začal jsem", "s nulou"], "od": 0.08, "do": 3.0, "y": 1100, "velikost": "md",
              "odstup": 0.16, "pocitadlo": null}],          # "radky": ["{n} surovin"], "pocitadlo": 7 → číslo naběhne 0 → 7
   "pilulka": {"text": "mujweb.cz", "od": 29.8, "y": 1060},
@@ -27,6 +27,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from nastaveni import PISMO  # noqa: E402
+
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 # zvuk: (soubor, bod synchronizace v s = kde je vrchol, délka v s) – časy ze sfx-kit catalogue.md
 SFX = {"pop": ("pop.wav", 0.011, 0.08), "zoom": ("whoosh-zoom.wav", 0.489, 0.57), "whip": ("whoosh-whip.wav", 0.092, 0.26)}
@@ -35,21 +38,21 @@ GSAP_CDN = "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"
 
 def gsap_lokalne():
     """gsap.min.js z instalace HyperFrames (npm -g), jinak None → načte se z CDN."""
-    try:
-        root = subprocess.run(["npm", "root", "-g"], capture_output=True, text=True).stdout.strip()
-    except FileNotFoundError:
+    npm = shutil.which("npm")  # na Windows npm.cmd
+    if not npm:
         return None
+    root = subprocess.run([npm, "root", "-g"], capture_output=True, text=True).stdout.strip()
     hits = sorted(glob.glob(f"{root}/hyperframes/dist/vendor/npm/gsap@*/dist/gsap.min.js"))
     return Path(hits[-1]) if hits else None
 
 
 spec_path = Path(sys.argv[1]).resolve()
-z = json.loads(spec_path.read_text())
+z = json.loads(spec_path.read_text(encoding="utf-8"))
 base = spec_path.parent
 S = z.get("posun", 0.0)
 W, H, FPS = z.get("w", 1080), z.get("h", 1920), z.get("fps", 25)
 dur = z["frames"] / FPS
-st = {"font": "Avenir Next", "ink": "#141414", "paper": "#ffffff", "radius": 14, "verzalky": True, "prostrkani": 0.07, **z.get("styl", {})}
+st = {"font": PISMO, "ink": "#141414", "paper": "#ffffff", "radius": 14, "verzalky": True, "prostrkani": 0.07, **z.get("styl", {})}
 out = (base / z["vystup"]).resolve()
 pub = out / "public"
 (pub / "assets").mkdir(parents=True, exist_ok=True)
@@ -146,7 +149,7 @@ doc = f"""<!DOCTYPE html>
       {nl.join(faces)}
       :root {{ --ink: {st["ink"]}; --paper: {st["paper"]}; --radius-box: {st["radius"]}px; }}
       * {{ box-sizing: border-box; }}
-      html, body {{ margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: "{st["font"]}", sans-serif; }}
+      html, body {{ margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: "{st["font"]}", "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif; }}
       #stage {{ position: relative; width: 100%; height: 100%; overflow: hidden; }}
       #video-wrap {{ position: absolute; inset: 0; overflow: hidden; }}
       #video-wrap video {{ width: 100%; height: 100%; object-fit: cover; }}
